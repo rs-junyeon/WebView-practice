@@ -41,8 +41,9 @@ npm run dev
 ### 2. 시뮬레이터 / 에뮬레이터 켜기
 
 ```sh
-# iOS 시뮬레이터
-open -a Simulator
+# iOS 시뮬레이터: 목록에서 기기 이름 확인 후 부팅 (이미 Booted 면 생략)
+xcrun simctl list devices available
+xcrun simctl boot "iPhone 17"
 
 # Android 에뮬레이터: 목록 확인 후 실행
 flutter emulators
