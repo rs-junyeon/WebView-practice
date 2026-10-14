@@ -4,4 +4,6 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- 로컬 Next.js 개발 서버(http)에 접속하기 위해 debug 빌드에서만 허용 -->
+    <application android:usesCleartextTraffic="true"/>
 </manifest>
