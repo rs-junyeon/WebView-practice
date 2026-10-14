@@ -41,7 +41,11 @@ npm run dev
 ### 2. 시뮬레이터 / 에뮬레이터 켜기
 
 ```sh
-# iOS 시뮬레이터: 목록에서 기기 이름 확인 후 부팅 (이미 Booted 면 생략)
+# iOS 시뮬레이터: Device Hub 창이 열리고 사이드바에서 기기를 골라 켜고 조작한다
+# (Xcode 27 부터 Simulator.app 대신 Device Hub 가 시뮬레이터 화면을 띄운다)
+open -a DeviceHub
+
+# 창 없이 부팅만 하려면 (flutter run 만 할 때)
 xcrun simctl list devices available
 xcrun simctl boot "iPhone 17"
 
