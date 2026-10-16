@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import 'native_bridge.dart';
+
 // 실기기에서는 --dart-define=WEB_URL=http://<Mac IP>:3000 으로 덮어쓴다.
 const _webUrlOverride = String.fromEnvironment('WEB_URL');
 
@@ -40,6 +42,8 @@ class _WebViewPageState extends State<WebViewPage> {
     ..setJavaScriptMode(JavaScriptMode.unrestricted)
     // 웹 → 앱: 웹에서 window.AppBridge.postMessage(JSON 문자열) 로 호출한다.
     ..addJavaScriptChannel('AppBridge', onMessageReceived: _onWebMessage)
+    // 웹 → 앱 요청/응답: 웹의 callNative() 가 window.NativeBridge.postMessage 로 호출한다.
+    ..addJavaScriptChannel('NativeBridge', onMessageReceived: _onNativeRequest)
     ..loadRequest(Uri.parse(_webUrl));
 
   int _sentCount = 0;
@@ -60,6 +64,26 @@ class _WebViewPageState extends State<WebViewPage> {
       'message': '앱에서 보낸 메시지 #$_sentCount',
     });
     await _controller.runJavaScript('window.onAppMessage?.($payload)');
+  }
+
+  // 요청 { id, method, params } 를 처리하고 window.onNativeResponse 로
+  // { id, result } 또는 { id, error } 를 돌려준다.
+  Future<void> _onNativeRequest(JavaScriptMessage message) async {
+    final request = jsonDecode(message.message) as Map<String, dynamic>;
+    final id = request['id'];
+    Map<String, Object?> response;
+    try {
+      final result = await handleNativeRequest(
+        request['method'] as String,
+        (request['params'] as Map<String, dynamic>?) ?? {},
+      );
+      response = {'id': id, 'result': result};
+    } catch (e) {
+      response = {'id': id, 'error': e.toString()};
+    }
+    await _controller.runJavaScript(
+      'window.onNativeResponse?.(${jsonEncode(response)})',
+    );
   }
 
   @override
