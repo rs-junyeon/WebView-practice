@@ -89,6 +89,24 @@ flutter run -d <기기 id>
 
 `window.AppBridge` 는 앱 웹뷰에서만 주입되므로, 일반 브라우저에서 열면 "앱 밖에서 실행 중" 으로 표시되고 전송 버튼이 비활성화된다.
 
+### 네이티브 기능 호출 (요청/응답)
+
+웹에서 `callNative(method, params)` (`web/src/lib/native-bridge.ts`) 를 호출하면 Promise 로 결과를 받는다.
+
+```
+웹  window.NativeBridge.postMessage({ id, method, params })
+앱  handleNativeRequest(method, params) 실행 (app/lib/native_bridge.dart)
+웹  window.onNativeResponse({ id, result } 또는 { id, error }) → id 로 Promise resolve/reject
+```
+
+| method | params | 결과 |
+|---|---|---|
+| `getDeviceInfo` | 없음 | `{ platform, model, osVersion }` |
+| `pickImage` | `{ source: "camera" \| "gallery" }` | 이미지 data URL (가로 1024px, 품질 80). 취소하면 `null` |
+
+새 기능은 `handleNativeRequest` 의 `switch` 에 method 를 추가하고, 웹에서 `callNative` 로 호출하면 된다.
+iOS 시뮬레이터에는 카메라가 없어서 `pickImage({ source: "camera" })` 는 에러로 응답한다.
+
 ## 실기기에서 실행
 
 실기기는 Mac 의 localhost 에 접근할 수 없으므로 Mac 의 LAN IP 를 직접 지정한다.
