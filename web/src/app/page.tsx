@@ -30,6 +30,7 @@ export default function Home() {
   const [received, setReceived] = useState<BridgeMessage[]>([]);
   const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
     window.onAppMessage = (message) =>
@@ -51,6 +52,17 @@ export default function Home() {
     setError(null);
     try {
       setDeviceInfo(await callNative<DeviceInfo>("getDeviceInfo"));
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
+
+  // 앱이 data URL 을 돌려주고, 사용자가 취소하면 null 이 온다.
+  const pickImage = async (source: "camera" | "gallery") => {
+    setError(null);
+    try {
+      const dataUrl = await callNative<string | null>("pickImage", { source });
+      if (dataUrl) setImage(dataUrl);
     } catch (e) {
       setError((e as Error).message);
     }
@@ -105,6 +117,33 @@ export default function Home() {
             {deviceInfo.platform} · {deviceInfo.model} · OS{" "}
             {deviceInfo.osVersion}
           </p>
+        )}
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="font-semibold">사진 첨부</h2>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => pickImage("camera")}
+            disabled={!inApp}
+            className="h-12 flex-1 rounded-full border border-black/[.08] px-5 font-medium disabled:opacity-40 dark:border-white/[.145]"
+          >
+            카메라
+          </button>
+          <button
+            type="button"
+            onClick={() => pickImage("gallery")}
+            disabled={!inApp}
+            className="h-12 flex-1 rounded-full border border-black/[.08] px-5 font-medium disabled:opacity-40 dark:border-white/[.145]"
+          >
+            갤러리
+          </button>
+        </div>
+        {image && (
+          // data URL 은 next/image 최적화 대상이 아니므로 img 를 그대로 쓴다.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={image} alt="선택한 사진" className="w-full rounded-lg" />
         )}
       </section>
     </main>
