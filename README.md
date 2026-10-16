@@ -77,6 +77,18 @@ flutter run -d <기기 id>
 - **앱 코드 (`app/lib/`)**: `flutter run` 터미널에서 `r` (hot reload) 또는 `R` (hot restart).
 - **네이티브 설정 (`app/android/`, `app/ios/`)**: `flutter run` 을 종료(`q`)하고 다시 실행해야 한다.
 
+## 웹 ↔ 앱 브리지
+
+메시지는 `{ "type": string, "message": string }` JSON 으로 주고받는다.
+형식을 바꾸면 `web/src/app/page.tsx` 와 `app/lib/main.dart` 를 함께 고쳐야 한다.
+
+| 방향 | 보내는 쪽 | 받는 쪽 |
+|---|---|---|
+| 웹 → 앱 | `window.AppBridge.postMessage(JSON 문자열)` | `addJavaScriptChannel('AppBridge')` → SnackBar 표시 |
+| 앱 → 웹 | `runJavaScript('window.onAppMessage(...)')` (우측 하단 버튼) | `window.onAppMessage` → 페이지 목록에 표시 |
+
+`window.AppBridge` 는 앱 웹뷰에서만 주입되므로, 일반 브라우저에서 열면 "앱 밖에서 실행 중" 으로 표시되고 전송 버튼이 비활성화된다.
+
 ## 실기기에서 실행
 
 실기기는 Mac 의 localhost 에 접근할 수 없으므로 Mac 의 LAN IP 를 직접 지정한다.
