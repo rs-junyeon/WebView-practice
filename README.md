@@ -105,7 +105,7 @@ flutter run -d <기기 id>
 | `pickImage` | `{ source: "camera" \| "gallery" }` | 이미지 data URL (가로 1024px, 품질 80). 취소하면 `null` |
 
 새 기능은 `handleNativeRequest` 의 `switch` 에 method 를 추가하고, 웹에서 `callNative` 로 호출하면 된다.
-iOS 시뮬레이터에는 카메라가 없어서 `pickImage({ source: "camera" })` 는 에러로 응답한다.
+iOS 시뮬레이터에는 카메라가 없어서 `pickImage({ source: "camera" })` 는 image_picker 가 "Camera not available." 알림을 띄운 뒤 `null` 로 응답한다 (취소와 구분되지 않음).
 
 ## 실기기에서 실행
 
